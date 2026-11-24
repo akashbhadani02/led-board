@@ -1,8 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 #include <Adafruit_NeoPixel.h>
-const char* WIFI_SSID = "YOUR_WIFI_NAME";
-const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
+const char* WIFI_SSID = "AB";
+const char* WIFI_PASSWORD = "hiyan41725";
 #define LED_PIN D4
 #define LED_COUNT 25
 #define UDP_PORT 4210
