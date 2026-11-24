@@ -1,26 +1,21 @@
-# Pixel25 Studio — Auto Wi-Fi Discovery
+# Pixel25 Studio - Hotspot / No IP entry
 
-This project controls 25 WS2812B LEDs using ESP8266. The IP input/connect button has been removed. ESP broadcasts a `PXDISC` UDP beacon to port 4211; the PC's Node.js bridge detects it and sends frames to that discovered IP using UDP port 4210.
+ESP8266 creates a Wi-Fi hotspot and serves the player page. No Node bridge, LAN IP search, or IP field.
 
-## Note about Vercel
-Vercel may host a static UI, but live LED control requires the local Node.js UDP bridge on a PC on the same Wi-Fi/LAN as the ESP. For live control, use the local URL printed by `npm start`.
+- Wi-Fi SSID: `Pixel25-LED`
+- Password: `pixel25123`
+- Web app: `http://192.168.4.1`
 
-## Setup
-1. Install Node.js LTS from https://nodejs.org.
-2. Install the Adafruit NeoPixel library in Arduino IDE.
-3. Open `esp8266/Pixel25_ESP8266.ino`, set Wi-Fi SSID/password (2.4 GHz), and upload to the ESP8266.
-4. In the project folder run `npm install` once, then `npm start`.
-5. On PC open `http://localhost:3000`. Wait for `Node: Connected` and `ESP: Connected`.
-6. On mobile, open the LAN URL shown by the terminal; keep PC, mobile and ESP on the same Wi-Fi.
-7. If Windows Firewall asks, allow Node.js on Private networks. UDP discovery port 4211 and data port 4210 should be allowed on your local network.
+## Libraries
+Install **Adafruit NeoPixel** and **WebSockets (Markus Sattler)**. ESP8266 core supplies ESP8266WebServer and LittleFS.
 
-## Features
-- Photo/video playback, 5x5 preview
-- Running brand text ticker (up to 200 chars)
-- Brightness, video speed, contrast, color strength, dithering, auto-brighten
-- Manual painting and customizable LED mapping
-- Auto WebSocket reconnect
-- Saves UI controls, LED map and painted pixels in browser local storage
+## Upload
+1. Flash `esp8266/Pixel25_ESP8266.ino` from Arduino IDE.
+2. Upload `data/index.html` to ESP8266 LittleFS using the ESP8266 LittleFS filesystem uploader tool.
+3. Join the `Pixel25-LED` Wi-Fi from phone/PC (password `pixel25123`).
+4. Browse to `http://192.168.4.1`, select media, and press Play.
+
+Stop only pauses and leaves the latest frame displayed on the LEDs.
 
 ## Wiring
-WS2812B DIN -> ESP D4/GPIO2; LED +5V -> external 5V; LED GND and ESP GND common. Use a 330-470 ohm data resistor and a suitable 5V power supply.
+WS2812 DIN to D4/GPIO2, strip 5V from external regulated supply, grounds common, recommended 330 ohm series data resistor. Do not power the strip from ESP regulator.
