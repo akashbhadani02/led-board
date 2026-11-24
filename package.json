@@ -1,5 +1,8 @@
 {
- "name":"pixel25-hotspot-player",
- "version":"2.0.0",
- "private":true
+  "name": "pixel25-ws2812b-player",
+  "version": "1.0.0",
+  "description": "Upload photo/video and play it on 25 WS2812B pixels via ESP8266",
+  "main": "server.js",
+  "scripts": {"start": "node server.js"},
+  "dependencies": {"express": "^4.21.2", "ws": "^8.18.0"}
 }

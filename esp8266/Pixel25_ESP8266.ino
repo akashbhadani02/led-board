@@ -1,21 +1,33 @@
 #include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
-#include <WebSocketsServer.h>
+#include <WiFiUdp.h>
 #include <Adafruit_NeoPixel.h>
-#include <LittleFS.h>
+
+const char* WIFI_SSID = "YOUR_WIFI_NAME";      // Set your Wi-Fi
+const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
 #define LED_PIN D4
 #define LED_COUNT 25
-const char* AP_SSID="Pixel25-LED";
-const char* AP_PASS="pixel25123";
-const uint8_t INITIAL_BRIGHTNESS=166;
-Adafruit_NeoPixel strip(LED_COUNT,LED_PIN,NEO_GRB+NEO_KHZ800);
-ESP8266WebServer http(80);
-WebSocketsServer ws(81);
-uint8_t frame[75];
-void applyFrame(){for(int i=0;i<25;i++)strip.setPixelColor(i,strip.Color(frame[i*3],frame[i*3+1],frame[i*3+2]));strip.show();}
-void onWs(uint8_t client,WStype_t type,uint8_t *payload,size_t len){
- if(type==WStype_BIN&&len==79&&payload[0]=='P'&&payload[1]=='X'&&payload[2]=='2'&&payload[3]=='5'){memcpy(frame,payload+4,75);applyFrame();}
- else if(type==WStype_TEXT){String msg((char*)payload);int k=msg.indexOf("value");if(msg.indexOf("brightness")>=0&&k>=0){int colon=msg.indexOf(':',k);int v=constrain(msg.substring(colon+1).toInt(),0,255);strip.setBrightness(v);applyFrame();}}
+#define UDP_PORT 4210
+Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+WiFiUDP udp;
+uint8_t brightness = 166; // ~65 percent
+uint8_t packet[100];
+void setup(){
+  Serial.begin(115200);
+  strip.begin(); strip.setBrightness(brightness); strip.clear(); strip.show();
+  WiFi.mode(WIFI_STA); WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Joining Wi-Fi");
+  while(WiFi.status()!=WL_CONNECTED){delay(350);Serial.print('.');}
+  Serial.println(); Serial.print("ESP IP: "); Serial.println(WiFi.localIP());
+  udp.begin(UDP_PORT); Serial.printf("UDP listening: %u\n", UDP_PORT);
 }
-void setup(){Serial.begin(115200);strip.begin();strip.setBrightness(INITIAL_BRIGHTNESS);strip.clear();strip.show();memset(frame,0,sizeof(frame));WiFi.mode(WIFI_AP);WiFi.softAPConfig(IPAddress(192,168,4,1),IPAddress(192,168,4,1),IPAddress(255,255,255,0));WiFi.softAP(AP_SSID,AP_PASS);Serial.println(WiFi.softAPIP());if(!LittleFS.begin())Serial.println("LittleFS mount error");http.on("/",HTTP_GET,[]{if(LittleFS.exists("/index.html"))http.streamFile(LittleFS,"/index.html","text/html");else http.send(500,"text/plain","Upload index.html to LittleFS.");});http.onNotFound([]{http.send(404,"text/plain","Not found");});http.begin();ws.begin();ws.onEvent(onWs);}
-void loop(){http.handleClient();ws.loop();}
+void loop(){
+  int packetSize=udp.parsePacket(); if(packetSize<=0)return;
+  int n=udp.read(packet,sizeof(packet));
+  if(n==5 && packet[0]=='P'&&packet[1]=='X'&&packet[2]=='L'&&packet[3]=='!'){
+    brightness=packet[4]; strip.setBrightness(brightness); strip.show(); return;
+  }
+  if(n==79 && packet[0]=='P'&&packet[1]=='X'&&packet[2]=='2'&&packet[3]=='5'){
+    for(int i=0;i<LED_COUNT;i++) strip.setPixelColor(i,strip.Color(packet[4+i*3],packet[5+i*3],packet[6+i*3]));
+    strip.show();
+  }
+}
