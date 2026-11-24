@@ -1,32 +1,26 @@
-# Pixel25 Studio (25× WS2812B + ESP8266)
+# Pixel25 Studio — Auto Wi-Fi Discovery
 
-Responsive browser control for a 5×5 pixel display. Upload image/video, preview 25 pixels, edit LED mapping, paint pixels, and control brightness. Node.js bridge sends pixel frames from your PC to the ESP8266 via UDP.
+This project controls 25 WS2812B LEDs using ESP8266. The IP input/connect button has been removed. ESP broadcasts a `PXDISC` UDP beacon to port 4211; the PC's Node.js bridge detects it and sends frames to that discovered IP using UDP port 4210.
 
-## Important: Vercel deployment limitation
-Vercel can host the static UI, but the actual LED control requires the Node.js bridge to be running on a computer on the same LAN as the ESP8266. Vercel serverless functions do not provide the persistent UDP bridge needed to send frames to a private LAN ESP. The hosted page alone will not control the LEDs. Use the local Node bridge for functional playback.
+## Note about Vercel
+Vercel may host a static UI, but live LED control requires the local Node.js UDP bridge on a PC on the same Wi-Fi/LAN as the ESP. For live control, use the local URL printed by `npm start`.
 
-## Run locally (full functionality)
-1. Install Node.js LTS.
-2. Flash `esp8266/Pixel25_ESP8266.ino` with your Wi-Fi SSID/password. Install the Adafruit NeoPixel Arduino library.
-3. In this project folder run `npm install` then `npm start`.
-4. On the PC open `http://localhost:3000`.
-5. On phones/tablets on the same Wi-Fi, open the LAN URL printed in the terminal.
-6. Enter ESP IP (no `:3000`) and connect.
+## Setup
+1. Install Node.js LTS from https://nodejs.org.
+2. Install the Adafruit NeoPixel library in Arduino IDE.
+3. Open `esp8266/Pixel25_ESP8266.ino`, set Wi-Fi SSID/password (2.4 GHz), and upload to the ESP8266.
+4. In the project folder run `npm install` once, then `npm start`.
+5. On PC open `http://localhost:3000`. Wait for `Node: Connected` and `ESP: Connected`.
+6. On mobile, open the LAN URL shown by the terminal; keep PC, mobile and ESP on the same Wi-Fi.
+7. If Windows Firewall asks, allow Node.js on Private networks. UDP discovery port 4211 and data port 4210 should be allowed on your local network.
 
-## GitHub upload
-Create a repository, upload the files/folders in this project, or push with git. Do not upload `node_modules`.
-
-
-## Vercel (static preview only)
-- Import this GitHub repository in Vercel.
-- Set the Root Directory to the project root.
-- Vercel will serve the `public` folder as a static website using `vercel.json`.
-- The hosted static page is for UI preview; the local Node bridge is still required for ESP playback.
-
+## Features
+- Photo/video playback, 5x5 preview
+- Running brand text ticker (up to 200 chars)
+- Brightness, video speed, contrast, color strength, dithering, auto-brighten
+- Manual painting and customizable LED mapping
+- Auto WebSocket reconnect
+- Saves UI controls, LED map and painted pixels in browser local storage
 
 ## Wiring
-- WS2812B DIN → ESP8266 D4 / GPIO2
-- LED strip 5V → external regulated 5V supply
-- LED strip GND and ESP GND → common ground
-- Recommended 330Ω resistor in series on data line
-- Provide adequate 5V current for 25 LEDs; avoid powering strip from the ESP board regulator.
+WS2812B DIN -> ESP D4/GPIO2; LED +5V -> external 5V; LED GND and ESP GND common. Use a 330-470 ohm data resistor and a suitable 5V power supply.

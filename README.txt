@@ -1,27 +1,26 @@
-Pixel25 Studio — Mobile + PC browser control for ESP8266 and 25 WS2812B LEDs
+# Pixel25 Studio — Auto Wi-Fi Discovery
 
-FEATURES
-- Responsive interface for desktop and mobile browser
-- Upload image/video from computer or mobile gallery
-- Live 5x5 pixel preview and Play/Pause/Stop
-- Brightness and video speed controls
-- Width/height selection (1 to 5)
-- Custom LED map editor: tap/click grid cells to assign LED #1 through #25 in your actual physical order
-- Manual pixel painting mode (select color and tap a grid cell)
-- Default serpentine map
+This project controls 25 WS2812B LEDs using ESP8266. The IP input/connect button has been removed. ESP broadcasts a `PXDISC` UDP beacon to port 4211; the PC's Node.js bridge detects it and sends frames to that discovered IP using UDP port 4210.
 
-INSTALL
-1) Arduino IDE: install Adafruit NeoPixel library.
-2) Open esp8266/Pixel25_ESP8266.ino, enter Wi-Fi SSID/password, select ESP8266 board and upload.
-3) On your computer install Node.js LTS from https://nodejs.org
-4) Open a terminal in this folder and run: npm install
-5) Run: npm start
-6) PC: open http://localhost:3000
-7) Phone: on the same Wi-Fi, open the LAN URL printed by the server, e.g. http://192.168.1.23:3000
-8) Enter ESP IP address printed in Arduino Serial Monitor, then Connect/Save IP.
+## Note about Vercel
+Vercel may host a static UI, but live LED control requires the local Node.js UDP bridge on a PC on the same Wi-Fi/LAN as the ESP. For live control, use the local URL printed by `npm start`.
 
-NOTES
-- Node server and ESP must be on the same local Wi-Fi/LAN. If mobile cannot open the URL, allow Node.js through Windows Firewall and check that your router does not isolate wireless clients.
-- WS2812B: DIN to ESP8266 D4 (GPIO2), 5V to external supply, and common GND. A 330-ohm series resistor on data is recommended. Use a suitably rated 5V supply.
-- Video is converted in the browser to 5x5 RGB frames and streamed over WebSocket to Node, then UDP to ESP.
-- This is a low-resolution 25-pixel display. Large/simple visuals work best.
+## Setup
+1. Install Node.js LTS from https://nodejs.org.
+2. Install the Adafruit NeoPixel library in Arduino IDE.
+3. Open `esp8266/Pixel25_ESP8266.ino`, set Wi-Fi SSID/password (2.4 GHz), and upload to the ESP8266.
+4. In the project folder run `npm install` once, then `npm start`.
+5. On PC open `http://localhost:3000`. Wait for `Node: Connected` and `ESP: Connected`.
+6. On mobile, open the LAN URL shown by the terminal; keep PC, mobile and ESP on the same Wi-Fi.
+7. If Windows Firewall asks, allow Node.js on Private networks. UDP discovery port 4211 and data port 4210 should be allowed on your local network.
+
+## Features
+- Photo/video playback, 5x5 preview
+- Running brand text ticker (up to 200 chars)
+- Brightness, video speed, contrast, color strength, dithering, auto-brighten
+- Manual painting and customizable LED mapping
+- Auto WebSocket reconnect
+- Saves UI controls, LED map and painted pixels in browser local storage
+
+## Wiring
+WS2812B DIN -> ESP D4/GPIO2; LED +5V -> external 5V; LED GND and ESP GND common. Use a 330-470 ohm data resistor and a suitable 5V power supply.
